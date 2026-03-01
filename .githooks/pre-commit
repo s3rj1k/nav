@@ -1,0 +1,13 @@
+#!/bin/sh
+# SPDX-License-Identifier: MIT
+# Pre-commit hook: generates internal/version/version_gen.go with a calver timestamp.
+
+set -eu
+
+version=$(date -u +"%Y %m %d %H %M %S" | awk '{printf "v%d.%d.%d", $1%100, $2+0, ($3-1)*86400+$4*3600+$5*60+$6}')
+
+target="internal/version/version.txt"
+
+printf '%s' "$version" > "$target"
+
+git add "$target"
