@@ -112,7 +112,8 @@ func (m *Model) RenderStatusBar(b *strings.Builder) {
 		b.WriteString(" [")
 		b.WriteString(config.ColorAccent)
 		b.WriteString(m.Query)
-		b.WriteString(config.ColorDim + "]")
+		b.WriteString(config.ColorDim)
+		b.WriteString("]")
 	}
 
 	// Filter mode indicator: hidden when showing both files and dirs.
@@ -124,7 +125,8 @@ func (m *Model) RenderStatusBar(b *strings.Builder) {
 		b.WriteString("}")
 	}
 
-	b.WriteString(config.StyleReset + "\n")
+	b.WriteString(config.StyleReset)
+	b.WriteString("\n")
 }
 
 // RenderHelpBar writes a single line of keybinding hints.
@@ -156,15 +158,18 @@ func (m *Model) RenderHelpBar(b *strings.Builder) {
 
 	for i, h := range hints {
 		// Key in highlight color, label in dim.
-		b.WriteString(config.ColorHighlight + " ")
+		b.WriteString(config.ColorHighlight)
+		b.WriteString(" ")
 		b.WriteString(h.key)
-		b.WriteString(config.ColorDim + " ")
+		b.WriteString(config.ColorDim)
+		b.WriteString(" ")
 		b.WriteString(h.label)
 		helpLen += 2 + utf8.RuneCountInString(h.key) + 1 + utf8.RuneCountInString(h.label)
 
 		// Separator between hints, but not after the last one.
 		if i < len(hints)-1 {
-			b.WriteString(config.ColorDim + config.HelpSeparator)
+			b.WriteString(config.ColorDim)
+			b.WriteString(config.HelpSeparator)
 			helpLen += utf8.RuneCountInString(config.HelpSeparator)
 		}
 	}
@@ -174,7 +179,8 @@ func (m *Model) RenderHelpBar(b *strings.Builder) {
 		b.WriteString(" ")
 	}
 
-	b.WriteString(config.StyleReset + "\n")
+	b.WriteString(config.StyleReset)
+	b.WriteString("\n")
 }
 
 // RenderItems writes the visible portion of the entry list, or a
@@ -192,21 +198,27 @@ func (m *Model) RenderItems(b *strings.Builder, scrollOffset, itemLines int) {
 
 // RenderError writes a red error message line.
 func (m *Model) RenderError(b *strings.Builder) {
-	b.WriteString(config.ColorError + "Error: ")
+	b.WriteString(config.ColorError)
+	b.WriteString("Error: ")
 	b.WriteString(m.Error.Error())
-	b.WriteString(config.StyleReset + "\n")
+	b.WriteString(config.StyleReset)
+	b.WriteString("\n")
 }
 
 // RenderEmpty writes a placeholder when there are no entries to show.
 func (m *Model) RenderEmpty(b *strings.Builder) {
 	if m.Query != "" {
-		b.WriteString(config.ColorDim + "No matches for " + config.ColorHighlight)
+		b.WriteString(config.ColorDim)
+		b.WriteString("No matches for ")
+		b.WriteString(config.ColorHighlight)
 		b.WriteString(m.Query)
 	} else {
-		b.WriteString(config.ColorDim + "(empty)")
+		b.WriteString(config.ColorDim)
+		b.WriteString("(empty)")
 	}
 
-	b.WriteString(config.StyleReset + "\n")
+	b.WriteString(config.StyleReset)
+	b.WriteString("\n")
 }
 
 // RenderEntryList writes the paginated file/directory rows with the
@@ -228,7 +240,8 @@ func (m *Model) RenderEntry(b *strings.Builder, index int) {
 	if selected {
 		b.WriteString(config.StyleSelected)
 	} else {
-		b.WriteString(config.ColorDim + "  ")
+		b.WriteString(config.ColorDim)
+		b.WriteString("  ")
 	}
 
 	// Entry name; directories get a trailing slash and path color.
@@ -243,5 +256,6 @@ func (m *Model) RenderEntry(b *strings.Builder, index int) {
 		b.WriteString(e.Name)
 	}
 
-	b.WriteString(config.StyleReset + "\n")
+	b.WriteString(config.StyleReset)
+	b.WriteString("\n")
 }

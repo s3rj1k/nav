@@ -7,67 +7,80 @@ import (
 	"fmt"
 	"runtime/debug"
 	"strings"
-
-	_ "embed"
+	"time"
 )
 
-//go:embed version.txt
-var generatedVersion string
+const (
+	baseVersion    = "0.0.0"
+	revPrefix      = "r"
+	abbRevisionLen = 8 // Length of the abbreviated git revision.
+)
 
-const shortRevLen = 7 // Length of the abbreviated git revision.
+// VCS returns a calver-style version string derived from build VCS info.
+func VCS(abbRevisionNum uint8) string {
+	buildInfo, ok := debug.ReadBuildInfo()
+	if !ok {
+		return baseVersion + "-unknown"
+	}
 
-// Version returns the generated calver version with optional build metadata
-// (+{short_hash} or +{short_hash}.dirty) from VCS info when available.
-func Version() string {
 	var (
-		revision string
-		modified bool
+		vcsRevision []rune
+		vcsModified string
+		vcsTime     string
 	)
 
-	if info, ok := debug.ReadBuildInfo(); ok {
-		for _, s := range info.Settings {
-			switch s.Key {
-			case "vcs.revision":
-				revision = s.Value
-				if len(revision) > shortRevLen {
-					revision = revision[:shortRevLen]
-				}
-			case "vcs.modified":
-				modified = s.Value == "true"
-			}
+	for _, el := range buildInfo.Settings {
+		switch el.Key {
+		case "vcs.revision":
+			vcsRevision = []rune(el.Value)
+		case "vcs.modified":
+			vcsModified = el.Value
+		case "vcs.time":
+			vcsTime = el.Value
+		default:
+			continue
 		}
 	}
 
-	version := generatedVersion
-	if version == "" {
-		version = "v0.0.0"
+	if strings.EqualFold(vcsModified, "true") {
+		return baseVersion + "-dirty"
 	}
 
-	var meta []string
-	if revision != "" {
-		meta = append(meta, revision)
+	if len(vcsRevision) == 0 || vcsTime == "" {
+		return baseVersion + "-unknown"
 	}
 
-	if modified {
-		meta = append(meta, "dirty")
+	t, err := time.Parse(time.RFC3339, vcsTime)
+	if err != nil {
+		return baseVersion + "-unknown"
 	}
 
-	if len(meta) == 0 && generatedVersion == "" {
-		meta = append(meta, "unknown")
+	var abbRevision string
+	if len(vcsRevision) <= int(abbRevisionNum) {
+		abbRevision = string(vcsRevision)
+	} else {
+		abbRevision = string(vcsRevision[:abbRevisionNum])
 	}
 
-	if len(meta) > 0 {
-		version += "+" + strings.Join(meta, ".")
-	}
+	return formatCalver(t, abbRevision)
+}
 
-	return version
+// formatCalver produces the SemVer-2.0.0-compliant calver string used by VCS.
+func formatCalver(t time.Time, abbRevision string) string {
+	secondsSinceMidnight := t.Hour()*3600 + t.Minute()*60 + t.Second()
+
+	return fmt.Sprintf("%d.%d.%d-%d.%s%s",
+		t.Year()%100, int(t.Month()), t.Day(), //nolint:mnd // last two digits of calendar year.
+		secondsSinceMidnight,
+		revPrefix, abbRevision,
+	)
 }
 
 // VersionInfo returns a multi-line string with detailed build information.
 func VersionInfo() string {
 	var b strings.Builder
 
-	fmt.Fprintf(&b, "version:  %s\n", Version())
+	fmt.Fprintf(&b, "version:  %s\n", VCS(abbRevisionLen))
 
 	info, ok := debug.ReadBuildInfo()
 	if !ok {
@@ -86,6 +99,8 @@ func VersionInfo() string {
 			fmt.Fprintf(&b, "commit:   %s\n", s.Value)
 		case "vcs.modified":
 			fmt.Fprintf(&b, "modified: %s\n", s.Value)
+		case "vcs.time":
+			fmt.Fprintf(&b, "time:     %s\n", s.Value)
 		case "GOARCH":
 			fmt.Fprintf(&b, "arch:     %s\n", s.Value)
 		case "GOOS":

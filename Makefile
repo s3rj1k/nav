@@ -1,4 +1,4 @@
-.PHONY: build lint tidy clean version hooks
+.PHONY: build lint tidy clean version
 
 GOOS   ?= $(shell go env GOOS)
 GOARCH ?= $(shell go env GOARCH)
@@ -13,10 +13,7 @@ tidy:
 	go mod tidy
 
 version:
-	@./BUILD/nav-$(GOOS)-$(GOARCH) -v 2>&1 | awk '/^version:/{print $$2}'
-
-hooks:
-	git config core.hooksPath .githooks
+	@./BUILD/nav-$(GOOS)-$(GOARCH) -version 2>&1 | awk '/^version:/{print $$2}'
 
 clean:
 	git clean -xfd

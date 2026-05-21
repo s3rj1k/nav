@@ -36,12 +36,12 @@ jobs:
       - name: Extract version
         id: version
         run: |
-          TAG=$(cat internal/version/version.txt)
-          if [ -z "${TAG}" ]; then
+          VERSION=$(make version)
+          if [ -z "${VERSION}" ]; then
             echo "::error::Empty version"
             exit 1
           fi
-          echo "tag=${TAG}" >> "${GITHUB_OUTPUT}"
+          echo "tag=v${VERSION}" >> "${GITHUB_OUTPUT}"
 
       - name: Create draft release
         run: |
