@@ -4,7 +4,7 @@ go 1.25.0
 
 require (
 	charm.land/bubbletea/v2 v2.0.6
-	github.com/sahilm/fuzzy v0.1.1
+	github.com/sahilm/fuzzy v0.1.2
 )
 
 require (
