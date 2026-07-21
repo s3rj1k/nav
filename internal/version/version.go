@@ -8,14 +8,15 @@ import (
 	"runtime/debug"
 )
 
-// VCS returns a calver-style version string derived from build VCS info.
+// VCS returns a v prefixed, semver compatible CalVer version string
+// derived from build VCS info.
 func VCS(abbRevisionNum uint8) string {
 	bi, ok := debug.ReadBuildInfo()
 	if !ok {
-		return baseVersion + "-unknown"
+		return vPrefix + baseVersion + "-unknown"
 	}
 
-	return VersionFromBuildInfo(bi, abbRevisionNum)
+	return vPrefix + FromBuildInfo(bi, abbRevisionNum)
 }
 
 // VersionInfo returns a multi-line string with detailed build information.

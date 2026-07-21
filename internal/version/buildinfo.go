@@ -11,13 +11,13 @@ import (
 )
 
 const (
-	baseVersion    = "0.0.0"
-	abbRevisionLen = 8 // Length of the abbreviated git revision.
+	baseVersion = "0.0.0"
+	// AbbRevisionLen is the default length of the abbreviated git revision.
+	AbbRevisionLen = 8
 )
 
-// VersionFromBuildInfo derives a calver-style version string from a
-// *debug.BuildInfo.
-func VersionFromBuildInfo(bi *debug.BuildInfo, abbRevisionNum uint8) string {
+// FromBuildInfo derives a version string in CalVer format from a *debug.BuildInfo.
+func FromBuildInfo(bi *debug.BuildInfo, abbRevisionNum uint8) string {
 	var (
 		vcsRevision string
 		vcsModified string
@@ -43,7 +43,7 @@ func VersionFromBuildInfo(bi *debug.BuildInfo, abbRevisionNum uint8) string {
 
 	if vcsRevision != "" && vcsTime != "" {
 		if t, err := time.Parse(time.RFC3339, vcsTime); err == nil {
-			return FormatCalver(t, Abbreviate(vcsRevision, abbRevisionNum))
+			return FormatCalver(t.UTC(), Abbreviate(vcsRevision, abbRevisionNum))
 		}
 	}
 
@@ -89,7 +89,7 @@ func FallbackPseudoFields(bi *debug.BuildInfo, revision, commitTime string) (out
 func VersionInfoFromBuildInfo(bi *debug.BuildInfo) string {
 	var b strings.Builder
 
-	fmt.Fprintf(&b, "version:  %s\n", VersionFromBuildInfo(bi, abbRevisionLen))
+	fmt.Fprintf(&b, "version:  %s\n", FromBuildInfo(bi, AbbRevisionLen))
 	fmt.Fprintf(&b, "go:       %s\n", bi.GoVersion)
 
 	var (

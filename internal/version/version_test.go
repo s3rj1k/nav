@@ -24,6 +24,7 @@ const (
 	testPseudoRev     = "abcdef123456"
 	valArm64          = "arm64"
 	valDarwin         = "darwin"
+	valModifiedFalse  = "false"
 
 	keyVCSRevision = "vcs.revision"
 	keyVCSTime     = "vcs.time"
@@ -63,6 +64,13 @@ func TestCalverIsSemVer(t *testing.T) {
 				t.Fatalf("FormatCalver(%v, %q) = %q; %q is not valid SemVer", tc.t, tc.rev, v, tag)
 			}
 		})
+	}
+}
+
+// A zero n means no truncation, so the full revision is returned.
+func TestAbbreviate_ZeroMeansFull(t *testing.T) {
+	if got := Abbreviate(testCommit, 0); got != testCommit {
+		t.Fatalf("got %q, want %q", got, testCommit)
 	}
 }
 
@@ -166,22 +174,39 @@ func TestParseMainVersion(t *testing.T) {
 	}
 }
 
-func TestVersionFromBuildInfo_LocalBuild(t *testing.T) {
+func TestFromBuildInfo_LocalBuild(t *testing.T) {
 	bi := &debug.BuildInfo{
 		Settings: []debug.BuildSetting{
 			{Key: keyVCSRevision, Value: testCommit},
 			{Key: keyVCSTime, Value: testCommitTime},
-			{Key: keyVCSModified, Value: "false"},
+			{Key: keyVCSModified, Value: valModifiedFalse},
 		},
 	}
 
 	want := FormatCalver(time.Date(2026, 5, 21, 14, 0, 0, 0, time.UTC), "abcdef12")
-	if got := VersionFromBuildInfo(bi, abbRevisionLen); got != want {
+	if got := FromBuildInfo(bi, AbbRevisionLen); got != want {
 		t.Fatalf("got %q, want %q", got, want)
 	}
 }
 
-func TestVersionFromBuildInfo_DirtyTree(t *testing.T) {
+// A vcs.time value with an offset other than UTC must normalize to the
+// same version string as its UTC equivalent.
+func TestFromBuildInfo_NonUTCTime(t *testing.T) {
+	bi := &debug.BuildInfo{
+		Settings: []debug.BuildSetting{
+			{Key: keyVCSRevision, Value: testCommit},
+			{Key: keyVCSTime, Value: "2026-05-21T16:00:00+02:00"},
+			{Key: keyVCSModified, Value: valModifiedFalse},
+		},
+	}
+
+	want := FormatCalver(time.Date(2026, 5, 21, 14, 0, 0, 0, time.UTC), "abcdef12")
+	if got := FromBuildInfo(bi, AbbRevisionLen); got != want {
+		t.Fatalf("got %q, want %q", got, want)
+	}
+}
+
+func TestFromBuildInfo_DirtyTree(t *testing.T) {
 	bi := &debug.BuildInfo{
 		Settings: []debug.BuildSetting{
 			{Key: keyVCSRevision, Value: testCommit},
@@ -190,41 +215,41 @@ func TestVersionFromBuildInfo_DirtyTree(t *testing.T) {
 		},
 	}
 
-	if got := VersionFromBuildInfo(bi, abbRevisionLen); got != baseVersion+"-dirty" {
+	if got := FromBuildInfo(bi, AbbRevisionLen); got != baseVersion+"-dirty" {
 		t.Fatalf("got %q, want %q", got, baseVersion+"-dirty")
 	}
 }
 
 // `go install pkg@latest` on an untagged repo: no vcs.*, pseudo Main.Version.
-func TestVersionFromBuildInfo_PseudoVersion(t *testing.T) {
+func TestFromBuildInfo_PseudoVersion(t *testing.T) {
 	bi := &debug.BuildInfo{
 		Main: debug.Module{Version: testPseudoVersion},
 	}
 
 	want := FormatCalver(time.Date(2026, 5, 21, 14, 0, 0, 0, time.UTC), "abcdef12")
-	if got := VersionFromBuildInfo(bi, abbRevisionLen); got != want {
+	if got := FromBuildInfo(bi, AbbRevisionLen); got != want {
 		t.Fatalf("got %q, want %q", got, want)
 	}
 }
 
 // `go install pkg@vX.Y.Z`: Main.Version holds a real tag.
-func TestVersionFromBuildInfo_Tag(t *testing.T) {
+func TestFromBuildInfo_Tag(t *testing.T) {
 	bi := &debug.BuildInfo{
 		Main: debug.Module{Version: testTag},
 	}
 
 	want := testTagWant
-	if got := VersionFromBuildInfo(bi, abbRevisionLen); got != want {
+	if got := FromBuildInfo(bi, AbbRevisionLen); got != want {
 		t.Fatalf("got %q, want %q", got, want)
 	}
 }
 
-func TestVersionFromBuildInfo_Devel(t *testing.T) {
+func TestFromBuildInfo_Devel(t *testing.T) {
 	bi := &debug.BuildInfo{
 		Main: debug.Module{Version: develVersion},
 	}
 
-	if got := VersionFromBuildInfo(bi, abbRevisionLen); got != baseVersion+"-unknown" {
+	if got := FromBuildInfo(bi, AbbRevisionLen); got != baseVersion+"-unknown" {
 		t.Fatalf("got %q, want %q", got, baseVersion+"-unknown")
 	}
 }
@@ -235,7 +260,7 @@ func TestVersionInfoFromBuildInfo_LocalBuild(t *testing.T) {
 		Settings: []debug.BuildSetting{
 			{Key: keyVCSRevision, Value: testCommit},
 			{Key: keyVCSTime, Value: testCommitTime},
-			{Key: keyVCSModified, Value: "false"},
+			{Key: keyVCSModified, Value: valModifiedFalse},
 			{Key: keyGOARCH, Value: valArm64},
 			{Key: keyGOOS, Value: valDarwin},
 		},

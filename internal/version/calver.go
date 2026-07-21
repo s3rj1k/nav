@@ -8,11 +8,15 @@ import (
 	"time"
 )
 
-const revPrefix = "r"
+const (
+	revPrefix = "r"
+	vPrefix   = "v"
+)
 
-// Abbreviate returns rev truncated to at most n characters.
+// Abbreviate returns rev truncated to at most n characters, or rev unmodified
+// if n is zero.
 func Abbreviate(rev string, n uint8) string {
-	if len(rev) <= int(n) {
+	if n == 0 || len(rev) <= int(n) {
 		return rev
 	}
 
