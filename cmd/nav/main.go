@@ -14,7 +14,7 @@ import (
 	"github.com/s3rj1k/nav/internal/config"
 	"github.com/s3rj1k/nav/internal/navigator"
 	"github.com/s3rj1k/nav/internal/shell"
-	"github.com/s3rj1k/nav/internal/version"
+	"github.com/s3rj1k/nav/pkg/version"
 )
 
 func main() {
