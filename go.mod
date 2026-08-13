@@ -5,7 +5,7 @@ go 1.26.0
 require (
 	charm.land/bubbletea/v2 v2.0.8
 	github.com/sahilm/fuzzy v0.1.3
-	golang.org/x/mod v0.38.0
+	golang.org/x/mod v0.40.0
 )
 
 require (
