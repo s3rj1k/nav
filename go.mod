@@ -3,7 +3,7 @@ module github.com/s3rj1k/nav
 go 1.26.0
 
 require (
-	charm.land/bubbletea/v2 v2.0.8
+	charm.land/bubbletea/v2 v2.0.9
 	github.com/sahilm/fuzzy v0.1.3
 	golang.org/x/mod v0.38.0
 )
