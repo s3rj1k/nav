@@ -13,26 +13,6 @@ import (
 	"github.com/s3rj1k/nav/internal/config"
 )
 
-// View renders the complete TUI frame: status bar, optional help bar,
-// and the entry list. Bubble Tea's inline renderer handles cursor
-// positioning and screen management.
-func (m *Model) View() tea.View {
-	// Wait for the first WindowSizeMsg before rendering; without terminal
-	// dimensions the layout calculation cannot determine item count.
-	if m.Height == 0 {
-		return tea.NewView("")
-	}
-
-	var b strings.Builder
-
-	itemLines, scrollOffset := m.Layout()
-	m.RenderStatusBar(&b)
-	m.RenderHelpBar(&b)
-	m.RenderItems(&b, scrollOffset, itemLines)
-
-	return tea.NewView(b.String())
-}
-
 // HelpBarHeight returns 1 when the help bar is visible, 0 otherwise.
 func (m *Model) HelpBarHeight() int {
 	if m.ShowHelp {
@@ -57,21 +37,6 @@ func (m *Model) EffectiveHeight() int {
 	return dh
 }
 
-// Layout calculates how many entry lines fit on screen and the scroll offset
-// needed to keep the cursor visible.
-func (m *Model) Layout() (itemLines, scrollOffset int) {
-	// Reserve rows for the status bar and optional help bar.
-	itemLines = m.EffectiveHeight() - 1 - m.HelpBarHeight()
-	if itemLines < config.MinItems {
-		itemLines = config.MinItems + 2 //nolint:mnd // ensure a usable minimum
-	}
-
-	// Compute scroll offset so the cursor stays within the visible window.
-	scrollOffset = m.ScrollOffset(itemLines)
-
-	return itemLines, scrollOffset
-}
-
 // ScrollOffset returns the first visible index so that the cursor row
 // is always within the rendered page.
 func (m *Model) ScrollOffset(itemLines int) int {
@@ -90,6 +55,21 @@ func (m *Model) ScrollOffset(itemLines int) int {
 	}
 
 	return offset
+}
+
+// Layout calculates how many entry lines fit on screen and the scroll offset
+// needed to keep the cursor visible.
+func (m *Model) Layout() (itemLines, scrollOffset int) {
+	// Reserve rows for the status bar and optional help bar.
+	itemLines = m.EffectiveHeight() - 1 - m.HelpBarHeight()
+	if itemLines < config.MinItems {
+		itemLines = config.MinItems + 2 //nolint:mnd // ensure a usable minimum
+	}
+
+	// Compute scroll offset so the cursor stays within the visible window.
+	scrollOffset = m.ScrollOffset(itemLines)
+
+	return itemLines, scrollOffset
 }
 
 // RenderStatusBar writes the top line: current path, cursor position counter,
@@ -183,19 +163,6 @@ func (m *Model) RenderHelpBar(b *strings.Builder) {
 	b.WriteString("\n")
 }
 
-// RenderItems writes the visible portion of the entry list, or a
-// placeholder message for error / empty / no-match states.
-func (m *Model) RenderItems(b *strings.Builder, scrollOffset, itemLines int) {
-	switch {
-	case m.Error != nil:
-		m.RenderError(b)
-	case len(m.Filtered) == 0:
-		m.RenderEmpty(b)
-	default:
-		m.RenderEntryList(b, scrollOffset, itemLines)
-	}
-}
-
 // RenderError writes a red error message line.
 func (m *Model) RenderError(b *strings.Builder) {
 	b.WriteString(config.ColorError)
@@ -219,16 +186,6 @@ func (m *Model) RenderEmpty(b *strings.Builder) {
 
 	b.WriteString(config.StyleReset)
 	b.WriteString("\n")
-}
-
-// RenderEntryList writes the paginated file/directory rows with the
-// cursor-selected entry highlighted.
-func (m *Model) RenderEntryList(b *strings.Builder, scrollOffset, itemLines int) {
-	end := min(scrollOffset+itemLines, len(m.Filtered))
-
-	for i := scrollOffset; i < end; i++ {
-		m.RenderEntry(b, i)
-	}
 }
 
 // RenderEntry writes a single entry line with appropriate styling.
@@ -258,4 +215,47 @@ func (m *Model) RenderEntry(b *strings.Builder, index int) {
 
 	b.WriteString(config.StyleReset)
 	b.WriteString("\n")
+}
+
+// RenderEntryList writes the paginated file/directory rows with the
+// cursor-selected entry highlighted.
+func (m *Model) RenderEntryList(b *strings.Builder, scrollOffset, itemLines int) {
+	end := min(scrollOffset+itemLines, len(m.Filtered))
+
+	for i := scrollOffset; i < end; i++ {
+		m.RenderEntry(b, i)
+	}
+}
+
+// RenderItems writes the visible portion of the entry list, or a
+// placeholder message for error / empty / no-match states.
+func (m *Model) RenderItems(b *strings.Builder, scrollOffset, itemLines int) {
+	switch {
+	case m.Error != nil:
+		m.RenderError(b)
+	case len(m.Filtered) == 0:
+		m.RenderEmpty(b)
+	default:
+		m.RenderEntryList(b, scrollOffset, itemLines)
+	}
+}
+
+// View renders the complete TUI frame: status bar, optional help bar,
+// and the entry list. Bubble Tea's inline renderer handles cursor
+// positioning and screen management.
+func (m *Model) View() tea.View {
+	// Wait for the first WindowSizeMsg before rendering; without terminal
+	// dimensions the layout calculation cannot determine item count.
+	if m.Height == 0 {
+		return tea.NewView("")
+	}
+
+	var b strings.Builder
+
+	itemLines, scrollOffset := m.Layout()
+	m.RenderStatusBar(&b)
+	m.RenderHelpBar(&b)
+	m.RenderItems(&b, scrollOffset, itemLines)
+
+	return tea.NewView(b.String())
 }

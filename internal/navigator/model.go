@@ -35,8 +35,10 @@ func (e Entries) Sort() {
 			if a.IsDir {
 				return -1
 			}
+
 			return 1
 		}
+
 		return cmp.Compare(a.Name, b.Name)
 	})
 }
@@ -56,6 +58,30 @@ type Model struct {
 	Filter        config.FilterMode // Active filter mode (dirs, files, or both).
 	Canceled      bool              // True when the user exits without selecting.
 	ShowHelp      bool              // True when the help bar is visible.
+}
+
+// ClampCursor ensures the cursor stays within the bounds of the filtered list.
+func (m *Model) ClampCursor() {
+	if m.Cursor >= len(m.Filtered) {
+		m.Cursor = max(0, len(m.Filtered)-1)
+	}
+}
+
+// ApplyFilter updates the Filtered list by fuzzy-matching Entries against Query.
+// When Query is empty all entries are shown. The cursor is clamped to stay in bounds.
+func (m *Model) ApplyFilter() {
+	if m.Query == "" {
+		m.Filtered = m.Entries
+	} else {
+		matches := fuzzy.FindFrom(m.Query, m.Entries)
+		m.Filtered = make(Entries, len(matches))
+
+		for i, match := range matches {
+			m.Filtered[i] = m.Entries[match.Index]
+		}
+	}
+
+	m.ClampCursor()
 }
 
 // LoadEntries reads the current directory and populates the entry list.
@@ -107,30 +133,6 @@ func (m *Model) LoadEntries() {
 	m.ApplyFilter()
 }
 
-// ApplyFilter updates the Filtered list by fuzzy-matching Entries against Query.
-// When Query is empty all entries are shown. The cursor is clamped to stay in bounds.
-func (m *Model) ApplyFilter() {
-	if m.Query == "" {
-		m.Filtered = m.Entries
-	} else {
-		matches := fuzzy.FindFrom(m.Query, m.Entries)
-		m.Filtered = make(Entries, len(matches))
-
-		for i, match := range matches {
-			m.Filtered[i] = m.Entries[match.Index]
-		}
-	}
-
-	m.ClampCursor()
-}
-
-// ClampCursor ensures the cursor stays within the bounds of the filtered list.
-func (m *Model) ClampCursor() {
-	if m.Cursor >= len(m.Filtered) {
-		m.Cursor = max(0, len(m.Filtered)-1)
-	}
-}
-
 // Init requests the current terminal size so the first View has valid dimensions.
 func (*Model) Init() tea.Cmd {
 	return tea.RequestWindowSize
@@ -142,6 +144,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.Width = msg.Width
 		m.Height = msg.Height
+
 		return m, nil
 
 	case tea.KeyPressMsg:
@@ -180,6 +183,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if len(m.Filtered) == 0 {
 				return m, nil
 			}
+
 			selected := m.Filtered[m.Cursor]
 			if selected.IsDir {
 				m.Path = filepath.Join(m.Path, selected.Name)
@@ -192,9 +196,12 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if len(m.Filtered) > 0 {
 				selected := m.Filtered[m.Cursor]
 				m.Selected = filepath.Join(m.Path, selected.Name)
+
 				return m, tea.Quit
 			}
+
 			m.Selected = m.Path
+
 			return m, tea.Quit
 
 		case "backspace": // delete last character from filter query
