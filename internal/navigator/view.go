@@ -63,7 +63,7 @@ func (m *Model) Layout() (itemLines, scrollOffset int) {
 	// Reserve rows for the status bar and optional help bar.
 	itemLines = m.EffectiveHeight() - 1 - m.HelpBarHeight()
 	if itemLines < config.MinItems {
-		itemLines = config.MinItems + 2 //nolint:mnd // ensure a usable minimum
+		itemLines = config.MinItems + 2 // ensure a usable minimum
 	}
 
 	// Compute scroll offset so the cursor stays within the visible window.
