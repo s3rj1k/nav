@@ -1,11 +1,11 @@
 module github.com/s3rj1k/nav
 
-go 1.26.0
+go 1.27
 
 require (
 	charm.land/bubbletea/v2 v2.0.9
 	github.com/sahilm/fuzzy v0.1.3
-	golang.org/x/mod v0.40.0
+	gitlab.com/ambossprojekt/version/go/semdtver v0.0.0-20260909211428-e3775d4d03fa
 )
 
 require (

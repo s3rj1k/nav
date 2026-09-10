@@ -10,11 +10,11 @@ import (
 	"path/filepath"
 
 	tea "charm.land/bubbletea/v2"
+	"gitlab.com/ambossprojekt/version/go/semdtver"
 
 	"github.com/s3rj1k/nav/internal/config"
 	"github.com/s3rj1k/nav/internal/navigator"
 	"github.com/s3rj1k/nav/internal/shell"
-	"github.com/s3rj1k/nav/pkg/version"
 )
 
 func main() {
@@ -48,7 +48,7 @@ func main() {
 	// Handle informational flags and exit early.
 	switch {
 	case *showVersion:
-		fmt.Fprint(os.Stderr, version.VersionInfo())
+		fmt.Fprint(os.Stderr, semdtver.VersionInfo())
 		os.Exit(0)
 	case *initBash:
 		script, err := shell.Init("bash")
