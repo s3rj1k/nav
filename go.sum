@@ -40,6 +40,8 @@ github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e h1:JVG44RsyaB9T2KIHavM
 github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e/go.mod h1:RbqR21r5mrJuqunuUZ/Dhy/avygyECGrLceyNeo4LiM=
 gitlab.com/ambossprojekt/version/go/semdtver v0.0.0-20260909211428-e3775d4d03fa h1:i9YZK+r6FzJ2TsJYVSL4UOmvcbS5G9lxgRKxl9Bv3Oo=
 gitlab.com/ambossprojekt/version/go/semdtver v0.0.0-20260909211428-e3775d4d03fa/go.mod h1:j2Jsay54PKBNfVum56HzZ/FoJHO5SgDSQ2lIM1V0luI=
+gitlab.com/ambossprojekt/version/go/semdtver v0.0.0-20260913183610-c13d84ecfb1e h1:k+bfMGUyIxXEgQ8kt7OCHrsVu1K68dTzkLNnr2c/y3k=
+gitlab.com/ambossprojekt/version/go/semdtver v0.0.0-20260913183610-c13d84ecfb1e/go.mod h1:8ZpYEGtgWpNB0WQcl0f/bOfap6Ntav+duWSLdlL3/5Y=
 go.yaml.in/yaml/v3 v3.0.5 h1:N6y/pJk8buWs9NY5ERU2HSMfm+IuD/OtfdAnq6kESPw=
 go.yaml.in/yaml/v3 v3.0.5/go.mod h1:HVTZu1O7/Vkt2N+BFy8Zza+lnLsABggaTM2ZpNIGuKg=
 golang.org/x/exp v0.0.0-20220909182711-5c715a9e8561 h1:MDc5xs78ZrZr3HMQugiXOAkSZtfTpbJLDr/lwfgO53E=
