@@ -5,7 +5,7 @@ go 1.27
 require (
 	charm.land/bubbletea/v2 v2.0.9
 	github.com/sahilm/fuzzy v0.1.3
-	gitlab.com/ambossprojekt/version/go/semdtver v0.0.0-20260909211428-e3775d4d03fa
+	gitlab.com/ambossprojekt/version/go/semdtver v0.0.0-20260913183610-c13d84ecfb1e
 )
 
 require (
