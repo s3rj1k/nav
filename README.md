@@ -14,10 +14,10 @@ go install github.com/s3rj1k/nav/cmd/nav@latest
 
 Download the appropriate binary from the [Releases](https://github.com/s3rj1k/nav/releases) page.
 
-On macOS, you need to remove the quarantine attribute before running the binary:
+Place the binary in your Go bin directory (e.g. `$HOME/go/bin`). On macOS, you also need to remove the quarantine attribute before running it:
 
 ```bash
-xattr -dr com.apple.quarantine /path/to/nav
+xattr -dr com.apple.quarantine "$HOME/go/bin/nav"
 ```
 
 ## Usage
