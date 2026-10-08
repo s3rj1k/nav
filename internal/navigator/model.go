@@ -206,7 +206,8 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case "backspace": // delete last character from filter query
 			if m.Query != "" {
-				m.Query = m.Query[:len(m.Query)-1]
+				runes := []rune(m.Query)
+				m.Query = string(runes[:len(runes)-1])
 				m.ApplyFilter()
 			}
 
@@ -215,8 +216,8 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.LoadEntries()
 
 		default: // append character to filter query
-			if len(msg.String()) == 1 {
-				m.Query += msg.String()
+			if msg.Text != "" {
+				m.Query += msg.Text
 				m.ApplyFilter()
 				m.Cursor = 0
 			}
